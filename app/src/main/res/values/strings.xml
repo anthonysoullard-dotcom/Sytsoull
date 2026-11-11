@@ -1,8 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Trajet Sytadin</string>
-    <string name="trajet_defaut">Vélizy → Arpajon</string>
+    <string name="aller">Vélizy → Arpajon</string>
+    <string name="retour">Arpajon → Vélizy</string>
     <string name="placeholder_temps">…</string>
     <string name="actualiser">Actualiser</string>
-    <string name="inverser">Inverser</string>
+    <string name="moins">−</string>
+    <string name="plus">+</string>
+    <string name="seuil_format">%d mn</string>
+    <string name="alerte_titre">Alerte temps de trajet</string>
+    <string name="alerte_aide">Notifie quand le temps dépasse le seuil (par tranche de 5 mn)</string>
+    <string name="surveillance_label">Surveillance en tâche de fond</string>
+    <string name="surveillance_texte">Vérification toutes les 5 minutes — seuil : %d mn</string>
+    <string name="alerte_texte">Temps actuel : %1$s (seuil : %2$d mn)</string>
+    <string name="derniere_maj">Actualisé le %1$s • Source : sytadin.fr</string>
 </resources>

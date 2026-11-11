@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Trajet Sytadin</string>
+    <string name="trajet_defaut">Vélizy → Arpajon</string>
+    <string name="placeholder_temps">…</string>
+    <string name="actualiser">Actualiser</string>
+    <string name="inverser">Inverser</string>
+</resources>

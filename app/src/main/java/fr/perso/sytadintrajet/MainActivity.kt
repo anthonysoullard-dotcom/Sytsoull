@@ -39,6 +39,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var erreurView: TextView
     private lateinit var progression: ProgressBar
     private lateinit var boutonActualiser: Button
+    private lateinit var boutonQuitter: Button
     private lateinit var boutonMoins: Button
     private lateinit var boutonPlus: Button
     private lateinit var seuilValeur: TextView
@@ -71,12 +72,14 @@ class MainActivity : AppCompatActivity() {
         erreurView = findViewById(R.id.erreur)
         progression = findViewById(R.id.progression)
         boutonActualiser = findViewById(R.id.actualiser)
+        boutonQuitter = findViewById(R.id.quitter)
         boutonMoins = findViewById(R.id.seuil_moins)
         boutonPlus = findViewById(R.id.seuil_plus)
         seuilValeur = findViewById(R.id.seuil_valeur)
         switchAlerte = findViewById(R.id.switch_alerte)
 
         boutonActualiser.setOnClickListener { actualiser() }
+        boutonQuitter.setOnClickListener { quitter() }
         boutonMoins.setOnClickListener { ajusterSeuil(-QUANTUM_SEUIL) }
         boutonPlus.setOnClickListener { ajusterSeuil(QUANTUM_SEUIL) }
 
@@ -123,6 +126,17 @@ class MainActivity : AppCompatActivity() {
     private fun desactiverSurveillance() {
         prefs.edit().putBoolean(KEY_ALERTE_ACTIVEE, false).apply()
         stopService(Intent(this, AlerteService::class.java))
+    }
+
+    private fun quitter() {
+        boucleJob?.cancel()
+        actualisationJob?.cancel()
+        if (prefs.getBoolean(KEY_ALERTE_ACTIVEE, false)) {
+            prefs.edit().putBoolean(KEY_ALERTE_ACTIVEE, false).apply()
+            switchAlerte.isChecked = false
+            stopService(Intent(this, AlerteService::class.java))
+        }
+        finishAffinity()
     }
 
     private fun ajusterSeuil(delta: Int) {

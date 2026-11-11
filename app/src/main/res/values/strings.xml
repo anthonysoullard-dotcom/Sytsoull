@@ -5,6 +5,7 @@
     <string name="retour">Arpajon → Vélizy</string>
     <string name="placeholder_temps">…</string>
     <string name="actualiser">Actualiser</string>
+    <string name="quitter">Quitter l'application</string>
     <string name="moins">−</string>
     <string name="plus">+</string>
     <string name="seuil_format">%d mn</string>

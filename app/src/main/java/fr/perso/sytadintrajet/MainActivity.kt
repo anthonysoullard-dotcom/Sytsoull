@@ -1,6 +1,7 @@
 package fr.perso.sytadintrajet
 
 import android.Manifest
+import android.app.TimePickerDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
@@ -8,6 +9,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import android.widget.ProgressBar
+import android.widget.RadioButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -45,6 +47,14 @@ class MainActivity : AppCompatActivity() {
     private lateinit var seuilValeur: TextView
     private lateinit var switchAlerte: MaterialSwitch
 
+    private lateinit var radioVelizy: RadioButton
+    private lateinit var radioLinas: RadioButton
+    private lateinit var boutonHeure: Button
+    private lateinit var boutonMargeMoins: Button
+    private lateinit var boutonMargePlus: Button
+    private lateinit var margeValeur: TextView
+    private lateinit var switchChienDeGarde: MaterialSwitch
+
     private val demandePermissionNotification =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { accordee ->
             if (accordee) {
@@ -77,13 +87,36 @@ class MainActivity : AppCompatActivity() {
         boutonPlus = findViewById(R.id.seuil_plus)
         seuilValeur = findViewById(R.id.seuil_valeur)
         switchAlerte = findViewById(R.id.switch_alerte)
+        radioVelizy = findViewById(R.id.arrivee_velizy)
+        radioLinas = findViewById(R.id.arrivee_linas)
+        boutonHeure = findViewById(R.id.heure_arrivee)
+        boutonMargeMoins = findViewById(R.id.marge_moins)
+        boutonMargePlus = findViewById(R.id.marge_plus)
+        margeValeur = findViewById(R.id.marge_valeur)
+        switchChienDeGarde = findViewById(R.id.switch_chien_de_garde)
 
         boutonActualiser.setOnClickListener { actualiser() }
         boutonQuitter.setOnClickListener { quitter() }
         boutonMoins.setOnClickListener { ajusterSeuil(-QUANTUM_SEUIL) }
         boutonPlus.setOnClickListener { ajusterSeuil(QUANTUM_SEUIL) }
+        boutonMargeMoins.setOnClickListener { ajusterMarge(-QUANTUM_MARGE) }
+        boutonMargePlus.setOnClickListener { ajusterMarge(QUANTUM_MARGE) }
+        boutonHeure.setOnClickListener { choisirHeure() }
 
         afficherSeuil()
+        afficherMarge()
+        afficherHeure()
+        when (prefs.getString(KEY_CHDG_ARRIVEE, CHDG_ARRIVEE_DEFAUT)) {
+            "linas" -> radioLinas.isChecked = true
+            else -> radioVelizy.isChecked = true
+        }
+        radioVelizy.setOnCheckedChangeListener { _, cochee ->
+            if (cochee) prefs.edit().putString(KEY_CHDG_ARRIVEE, "velizy").apply()
+        }
+        radioLinas.setOnCheckedChangeListener { _, cochee ->
+            if (cochee) prefs.edit().putString(KEY_CHDG_ARRIVEE, "linas").apply()
+        }
+
         switchAlerte.isChecked = prefs.getBoolean(KEY_ALERTE_ACTIVEE, false)
         switchAlerte.setOnCheckedChangeListener { _, cochee ->
             if (cochee) {
@@ -93,7 +126,28 @@ class MainActivity : AppCompatActivity() {
                     demandePermissionNotification.launch(Manifest.permission.POST_NOTIFICATIONS)
                 }
             } else {
-                desactiverSurveillance()
+                prefs.edit().putBoolean(KEY_ALERTE_ACTIVEE, false).apply()
+                gererService()
+            }
+        }
+
+        switchChienDeGarde.isChecked = prefs.getBoolean(KEY_CHDG_ACTIF, false)
+        switchChienDeGarde.setOnCheckedChangeListener { _, cochee ->
+            if (cochee) {
+                if (peutNotifier()) {
+                    activerChienDeGarde()
+                } else {
+                    switchChienDeGarde.isChecked = false
+                    Toast.makeText(
+                        this,
+                        "Notifications refusées : le chien de garde ne peut pas être activé",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            } else {
+                prefs.edit().putBoolean(KEY_CHDG_ACTIF, false).apply()
+                prefs.edit().putBoolean(KEY_CHDG_ALERTE_EN_COURS, false).apply()
+                gererService()
             }
         }
     }
@@ -119,23 +173,36 @@ class MainActivity : AppCompatActivity() {
     private fun activerSurveillance() {
         prefs.edit().putBoolean(KEY_ALERTE_ACTIVEE, true).apply()
         switchAlerte.isChecked = true
-        ContextCompat.startForegroundService(this, Intent(this, AlerteService::class.java))
+        gererService()
         Toast.makeText(this, "Surveillance activée (tâche de fond)", Toast.LENGTH_SHORT).show()
     }
 
-    private fun desactiverSurveillance() {
-        prefs.edit().putBoolean(KEY_ALERTE_ACTIVEE, false).apply()
-        stopService(Intent(this, AlerteService::class.java))
+    private fun activerChienDeGarde() {
+        prefs.edit().putBoolean(KEY_CHDG_ACTIF, true).apply()
+        prefs.edit().putBoolean(KEY_CHDG_ALERTE_EN_COURS, false).apply()
+        switchChienDeGarde.isChecked = true
+        gererService()
+        Toast.makeText(this, "Chien de garde activé (tâche de fond)", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun gererService() {
+        val quelqueChoseActif =
+            prefs.getBoolean(KEY_ALERTE_ACTIVEE, false) || prefs.getBoolean(KEY_CHDG_ACTIF, false)
+        if (quelqueChoseActif) {
+            ContextCompat.startForegroundService(this, Intent(this, AlerteService::class.java))
+        } else {
+            stopService(Intent(this, AlerteService::class.java))
+        }
     }
 
     private fun quitter() {
         boucleJob?.cancel()
         actualisationJob?.cancel()
-        if (prefs.getBoolean(KEY_ALERTE_ACTIVEE, false)) {
-            prefs.edit().putBoolean(KEY_ALERTE_ACTIVEE, false).apply()
-            switchAlerte.isChecked = false
-            stopService(Intent(this, AlerteService::class.java))
-        }
+        prefs.edit().putBoolean(KEY_ALERTE_ACTIVEE, false).apply()
+        prefs.edit().putBoolean(KEY_CHDG_ACTIF, false).apply()
+        switchAlerte.isChecked = false
+        switchChienDeGarde.isChecked = false
+        stopService(Intent(this, AlerteService::class.java))
         finishAffinity()
     }
 
@@ -146,8 +213,41 @@ class MainActivity : AppCompatActivity() {
         afficherSeuil()
     }
 
+    private fun ajusterMarge(delta: Int) {
+        val nouveau = (prefs.getInt(KEY_CHDG_MARGE, CHDG_MARGE_DEFAUT) + delta)
+            .coerceIn(CHDG_MARGE_MIN, CHDG_MARGE_MAX)
+        prefs.edit().putInt(KEY_CHDG_MARGE, nouveau).apply()
+        afficherMarge()
+    }
+
     private fun afficherSeuil() {
         seuilValeur.text = getString(R.string.seuil_format, prefs.getInt(KEY_SEUIL, SEUIL_DEFAUT))
+    }
+
+    private fun afficherMarge() {
+        margeValeur.text =
+            getString(R.string.seuil_format, prefs.getInt(KEY_CHDG_MARGE, CHDG_MARGE_DEFAUT))
+    }
+
+    private fun afficherHeure() {
+        val minutes = prefs.getInt(KEY_CHDG_HEURE, CHDG_HEURE_DEFAUT)
+        boutonHeure.text = "%02d:%02d".format(minutes / 60, minutes % 60)
+    }
+
+    private fun choisirHeure() {
+        val actuel = prefs.getInt(KEY_CHDG_HEURE, CHDG_HEURE_DEFAUT)
+        TimePickerDialog(
+            this,
+            { _, heure, minute ->
+                var total = heure * 60 + Math.round(minute / 10.0).toInt() * QUANTUM_HEURE
+                if (total >= 1440) total -= 1440
+                prefs.edit().putInt(KEY_CHDG_HEURE, total).apply()
+                afficherHeure()
+            },
+            actuel / 60,
+            (actuel % 60 / 10) * 10,
+            true
+        ).show()
     }
 
     private fun demarrerBoucle() {

@@ -38,6 +38,28 @@ L'app intègre une fonction de surveillance activable :
   répétition toutes les 5 minutes) ; elle repart si le temps repasse sous le
   seuil puis le redépasse.
 
+## Chien de garde
+
+Une seconde fonction activable, le **chien de garde**, aide à partir à temps :
+
+- l'utilisateur choisit son **point d'arrivée** (Vélizy ou Linas/Arpajon),
+  l'**heure d'arrivée souhaitée** (réglée à 10 minutes près via un sélecteur
+  d'heure) et une **marge** en minutes (pas de 5 mn, boutons − / +) ;
+- l'interrupteur active le chien de garde : comme pour l'alerte, la
+  surveillance tourne en **tâche de fond** et vérifie le temps de trajet
+  toutes les 5 minutes ;
+- le temps de trajet actuel est comparé à l'heure d'arrivée voulue : dès qu'il
+  ne reste plus que la marge (ou moins) avant l'heure de départ au plus tard,
+  une **notification** « C'est l'heure de partir ! » est envoyée, avec le temps
+  actuel et l'heure limite de départ ;
+- la notification n'est envoyée qu'une fois par période critique ; elle peut
+  se déclencher à nouveau si la situation redevient confortable puis se
+  dégrade.
+
+L'alerte seuil et le chien de garde peuvent être actifs simultanément ; un
+seul service de fond est utilisé, arrêté dès que les deux sont désactivés (ou
+via le bouton « Quitter l'application »).
+
 ## Construire l'APK
 
 Deux options :
@@ -57,5 +79,3 @@ l'installer (autoriser l'installation de sources inconnues).
 - Si Sytadin modifie son formulaire, l'app s'adapte en relisant les champs et
   les pôles directement depuis la page ; une liste de secours (IDs connus) est
   intégrée au cas où la liste déroulante serait chargée en JavaScript.
-- Pour une fiabilité maximale de la surveillance en tâche de fond, désactiver
-  l'optimisation de batterie pour l'application dans les réglages Android.

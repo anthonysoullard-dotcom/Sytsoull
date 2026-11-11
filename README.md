@@ -20,7 +20,23 @@ puis soumet le formulaire et extrait de la page résultat :
 - la **fiabilité** (% de l'itinéraire couvert par des données temps réel)
 - la **distance** quand Sytadin l'affiche
 
-Un bouton **Inverser** permet d'obtenir le sens Arpajon → Vélizy.
+Les **deux sens** (Vélizy → Arpajon et Arpajon → Vélizy) sont affichés
+simultanément et rafraîchis automatiquement **toutes les 5 minutes** tant que
+l'application est active.
+
+## Alerte sur seuil
+
+L'app intègre une fonction de surveillance activable :
+
+- l'utilisateur règle un **temps de trajet seuil** en minutes (réglage par pas
+  de 5 mn, boutons − / +) ;
+- un interrupteur active la **surveillance en tâche de fond** (service en
+  avant-plan) : l'app continue de se mettre à jour toutes les 5 minutes et
+  **notifie** dès que le temps de trajet actualisé dépasse le seuil, dans un
+  sens comme dans l'autre ;
+- la notification n'est envoyée qu'au franchissement du seuil (pas de
+  répétition toutes les 5 minutes) ; elle repart si le temps repasse sous le
+  seuil puis le redépasse.
 
 ## Construire l'APK
 
@@ -41,3 +57,5 @@ l'installer (autoriser l'installation de sources inconnues).
 - Si Sytadin modifie son formulaire, l'app s'adapte en relisant les champs et
   les pôles directement depuis la page ; une liste de secours (IDs connus) est
   intégrée au cas où la liste déroulante serait chargée en JavaScript.
+- Pour une fiabilité maximale de la surveillance en tâche de fond, désactiver
+  l'optimisation de batterie pour l'application dans les réglages Android.

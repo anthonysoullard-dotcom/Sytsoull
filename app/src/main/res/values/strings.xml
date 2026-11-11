@@ -12,7 +12,17 @@
     <string name="alerte_titre">Alerte temps de trajet</string>
     <string name="alerte_aide">Notifie quand le temps dépasse le seuil (par tranche de 5 mn)</string>
     <string name="surveillance_label">Surveillance en tâche de fond</string>
-    <string name="surveillance_texte">Vérification toutes les 5 minutes — seuil : %d mn</string>
     <string name="alerte_texte">Temps actuel : %1$s (seuil : %2$d mn)</string>
     <string name="derniere_maj">Actualisé le %1$s • Source : sytadin.fr</string>
+    <string name="chdg_titre">Chien de garde</string>
+    <string name="chdg_arrivee">J\'arrive à :</string>
+    <string name="chdg_linas">Linas (Arpajon)</string>
+    <string name="chdg_heure">Heure d\'arrivée</string>
+    <string name="chdg_marge">Marge</string>
+    <string name="chdg_switch">Chien de garde actif</string>
+    <string name="chdg_aide">Notifie quand il reste moins que la marge pour partir (par tranche de 5 mn)</string>
+    <string name="chdg_notif_titre">C\'est l\'heure de partir !</string>
+    <string name="chdg_notif_texte">Pour arriver à %2$s à %1$s : temps actuel %3$s, départ au plus tard à %4$s.</string>
+    <string name="surveillance_generique">Vérification toutes les 5 minutes</string>
+    <string name="surveillance_details">Vérification toutes les 5 minutes • %1$s</string>
 </resources>
